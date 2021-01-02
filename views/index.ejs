@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/style2.css">
+  </head>
+  <body>
+    <form class="modal-content animate" action="/login" method="post">
+      <div class="imgcontainer">
+        <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="avatar">
+      </div>
+
+      <%- include('./messages.ejs') %> 
+
+      <div class="container">
+        <label for="uname"><b>Username</b></label>
+        <input type="text" placeholder="Enter Username" name="username" value="<%= body.username %>" required>
+
+        <label for="psw"><b>Password</b></label>
+        <input type="password" placeholder="Enter Password" name="password" required>
+          
+        <button type="submit">Login</button>
+        <button type="button" style="background: #7F7FD5;" onclick="window.location='/register'">Register</button>
+      </div>
+    </form>
+  </body>
+</html>

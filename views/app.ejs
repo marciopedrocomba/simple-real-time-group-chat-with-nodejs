@@ -1,0 +1,127 @@
+<% 
+
+function calcTime(duration) {
+
+	let seconds = parseInt((duration / 1000) % 60)
+	let minutes = parseInt((duration / (1000 * 60)) % 60)
+	let hours = parseInt((duration / (1000 * 60 * 60)) % 24)
+	let days = parseInt(duration / (24*60*60*1000))
+
+	if (days > 0) {
+		return `${days}d`
+	}
+
+	if(hours > 0) {
+		return `${hours}h`
+	}
+
+	if(minutes > 0) {
+		return `${minutes}min`
+	}
+
+	if(seconds > 0) {
+		return `${seconds}sec`
+	}
+
+	return ``
+}
+
+%> 
+
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+<!------ Include the above in your HEAD tag ---------->
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<title><%= title %> </title>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+        <link rel="stylesheet" href="/css/style.css">
+	</head>
+	<!--Coded With Love By Mutiullah Samim-->
+	<body>
+		<div class="container-fluid h-100">
+			<div class="row justify-content-center h-100">
+				<div class="col-md-10 col-xl-8 chat">
+					<div class="card">
+						<div class="d-flex justify-content-between card-header msg_head">
+							<div class="d-flex bd-highlight">
+								<div class="img_cont">
+									<img src="/img/<%= user.photo %> " class="rounded-circle user_img">
+									<span class="online_icon"></span>
+								</div>
+								<div class="user_info">
+									<span><%= user.username %></span>
+									<p><i class="message-total"><%= messages.length %></i> Messages</p>
+								</div>
+							</div>
+							<a href="/logout" class="logout-btn">Logout</a>
+						</div>
+						<div class="card-body msg_card_body">
+
+							<% messages.forEach(message => { %> 
+
+								<% if(message.user != user.id) { %> 
+
+									<div class="d-flex justify-content-start mb-4">
+										<div class="img_cont_msg">
+											<img src="/img/<%= message.photo %>" class="rounded-circle user_img_msg">
+										</div>
+										<div class="msg_cotainer">
+											<%= message.content %> 
+											<% if(calcTime(Date.now() - message.time).indexOf('d') > -1) { %>
+
+												<span class="msg_time_send"><%= message.date.toLocaleDateString('pt') %></span>
+
+											<% }else { %>
+												
+												<span class="msg_time_send"><%= calcTime(Date.now() - message.time) %> ago</span>
+
+											<% } %> 
+										</div>
+									</div>
+
+								<% } else { %> 
+
+									<div class="d-flex justify-content-end mb-4">
+										<div class="msg_cotainer_send">
+											<%= message.content %> 
+											<% if(calcTime(Date.now() - message.time).indexOf('d') > -1) { %>
+
+												<span class="msg_time_send"><%= message.date.toLocaleDateString('pt') %></span>
+
+											<% }else { %>
+												
+												<span class="msg_time_send"><%= calcTime(Date.now() - message.time) %> ago</span>
+
+											<% } %> 
+										</div>
+										<div class="img_cont_msg">
+											<img src="/img/<%= message.photo %>" class="rounded-circle user_img_msg">
+										</div>
+									</div>
+
+								<% } %> 
+
+							<% }) %> 
+						</div>
+						<div class="card-footer">
+							<div class="input-group">
+								<input type="hidden" name="message-user" value="<%= user.id %>">
+								<input type="hidden" name="message-photo" value="<%= user.photo %>">
+								<textarea name="message-content" class="form-control type_msg" placeholder="Type your message..."></textarea>
+								<div class="input-group-append">
+									<span class="input-group-text send_btn"><i class="fas fa-location-arrow"></i></span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/AppController.js"></script>
