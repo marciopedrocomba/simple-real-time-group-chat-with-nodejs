@@ -8,6 +8,8 @@ class AppController {
         this.photo = document.querySelector('[name=message-photo]').value
         this.messageEl = document.querySelector('[name=message-content]')
 
+        this.audio = new Audio('/sounds/accomplished-579.ogg')
+
         this.initialize()
 
     }
@@ -102,18 +104,53 @@ class AppController {
 
                 this.messageCardEl.appendChild(div)
 
-                const audio = new Audio('/sounds/accomplished-579.ogg')
-                audio.currentTime = 0
-                audio.play()
+                this.playAudio()
 
             }
 
-            let total = parseInt(document.querySelector('.message-total').innerHTML)
-            document.querySelector('.message-total').innerHTML = total+1
+            //update the messages statistics
+            this.updateMessageCount()
             
 
         })
 
+        this.socket.on('new user', data => {
+
+            const div = this.createElement('div', {
+
+                innerHTML: `
+
+                    <div class="img_cont_msg">
+                        <img src="/img/${data.photo}" class="rounded-circle user_img_msg">
+                    </div>
+
+                    <div class="msg_cotainer">
+                        New User ${data.email}
+                    </div>
+
+                `
+
+            }, element => {
+
+                element.classList.add('d-flex', 'justify-content-center', 'mb-4')
+            })
+
+            this.messageCardEl.appendChild(div)
+
+            this.playAudio()
+
+        })
+
+    }
+
+    updateMessageCount() {
+        let total = parseInt(document.querySelector('.message-total').innerHTML)
+        document.querySelector('.message-total').innerHTML = total+1
+    }
+
+    playAudio() {
+        this.audio.currentTime = 0
+        this.audio.play()
     }
 
     createElement(element, options, callback) {

@@ -108,6 +108,7 @@ router.post('/register', formidable, async (req, res) => {
         const login = await User.login(req.body.email, req.body.password)
 
         if(login) {
+          io.emit('new user', login)
           req.session.user = login
           res.redirect('/app')
         }
