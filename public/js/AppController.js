@@ -1,7 +1,8 @@
 class AppController {
     constructor() {
 
-        this.sendMessageBtnEl = document.querySelector('.input-group-append')
+        this.sendMessageBtnEl = document.querySelector('.input-group-append .send_btn')
+        this.openCameraBtnEl = document.querySelector('.input-group-append .open_photo')
         this.messageCardEl = document.querySelector('.msg_card_body')
 
         this.user = document.querySelector('[name=message-user]').value
@@ -9,6 +10,8 @@ class AppController {
         this.messageEl = document.querySelector('[name=message-content]')
 
         this.audio = new Audio('/sounds/accomplished-579.ogg')
+
+        this.cameraModal = document.getElementById('camera-modal')
 
         this.initialize()
 
@@ -29,6 +32,47 @@ class AppController {
 
         })
         
+        this.openCameraBtnEl.addEventListener('click', e => {
+            this.video = this.cameraModal.querySelector('video')
+            this.cameraController = new CameraController(this.video)
+            this.toggleSendAndCaptureBtns()
+            this.cameraModal.style.display = 'block'
+        })
+
+        this.cameraModal.querySelector('.close').addEventListener('click', e => {
+            this.cameraModal.style.display = 'none'
+            this.cameraModal.querySelector('video').style.display = 'block'
+            this.cameraModal.querySelector('img').style.display = 'none'
+            this.cameraController.stop()
+        })
+
+        this.cameraModal.querySelector('.btn-capture-photo').addEventListener('click', e => {
+
+            this.cameraModal.querySelector('video').style.display = 'none'
+            this.toggleSendAndCaptureBtns(false)
+
+            const imageEl = this.cameraModal.querySelector('img')
+            const dataURL = this.capturePhoto()
+
+            imageEl.src = dataURL
+            
+            imageEl.style.display = 'block'
+        })
+
+        this.cameraModal.querySelector('.btn-send-photo').addEventListener('click', e => {
+
+            const imageURL = this.cameraModal.querySelector('img').src
+
+            const blob = this.dataURItoBlob(imageURL)
+
+            const file = new File([blob], `photo-${Date.now()}`, {
+                type: 'image/png',
+                lastModified: Date.now()
+            })
+
+            this.sendFile(file)
+
+        })
 
         this.messageEl.addEventListener('keyup', e => {
 
@@ -140,6 +184,60 @@ class AppController {
             this.playAudio()
 
         })
+
+    }
+
+    sendFile(file) {
+
+        console.log(file)
+
+    }
+
+    dataURItoBlob(dataURI) {
+        // convert base64 to raw binary data held in a string
+        // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+        var byteString = atob(dataURI.split(',')[1]);
+  
+        // separate out the mime component
+        var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+  
+        // write the bytes of the string to an ArrayBuffer
+        var ab = new ArrayBuffer(byteString.length);
+        var ia = new Uint8Array(ab);
+
+        for (var i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
+        }
+
+        return new Blob([ab], { type: mimeString });
+      }
+
+    toggleSendAndCaptureBtns(status = true) {
+        if(status) {
+
+            this.cameraModal.querySelector('.btn-capture-photo').style.display = 'block'
+            this.cameraModal.querySelector('.btn-send-photo').style.display = 'none'
+
+        }else {
+
+            this.cameraModal.querySelector('.btn-capture-photo').style.display = 'none'
+            this.cameraModal.querySelector('.btn-send-photo').style.display = 'block'
+
+        }
+    }
+
+    capturePhoto(type = 'image/png') {
+
+        const canvas = document.createElement('canvas')
+
+        canvas.width = 500
+        canvas.height = 400
+
+        const context = canvas.getContext('2d')
+
+        context.drawImage(this.video, 0, 0, canvas.width, canvas.height)
+
+        return canvas.toDataURL(type)
 
     }
 

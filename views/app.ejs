@@ -112,6 +112,7 @@ function calcTime(duration) {
 								<input type="hidden" name="message-photo" value="<%= user.photo %>">
 								<textarea name="message-content" class="form-control type_msg" placeholder="Type your message..."></textarea>
 								<div class="input-group-append">
+									<span class="input-group-text open_photo" style="border-radius: 0px !important;"><i class="fas fa-image"></i></span>
 									<span class="input-group-text send_btn"><i class="fas fa-location-arrow"></i></span>
 								</div>
 							</div>
@@ -120,8 +121,21 @@ function calcTime(duration) {
 				</div>
 			</div>
 		</div>
+
+		<!-- The Modal -->
+		<div id="camera-modal" class="modal">
+			<span class="close">&times;</span>
+			<video class="modal-content" id="camera-video"></video>
+			<img style="display: none;" class="modal-content" id="camera-photo" src="/img/<%= user.photo %>">
+			<div id="caption">
+				<button class="btn-capture-photo"><i class="fas fa-image"></i></button>
+				<button class="btn-send-photo" style="display: none;"><i class="fas fa-location-arrow"></i></button>
+			</div>
+		</div>
+
 	</body>
 </html>
 
 <script src="/socket.io/socket.io.js"></script>
+<script src="/js/CameraController.js"></script>
 <script src="/js/AppController.js"></script>
