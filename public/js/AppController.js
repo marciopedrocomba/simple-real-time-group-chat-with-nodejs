@@ -10,6 +10,7 @@ class AppController {
         this.messageEl = document.querySelector('[name=message-content]')
 
         this.audio = new Audio('/sounds/accomplished-579.ogg')
+        this.captureAudio = new Audio('/sounds/camera-shutter-click-01.wav')
 
         this.cameraModal = document.getElementById('camera-modal')
         this.viewPhotoModal = document.getElementById('view-image-modal')
@@ -56,6 +57,8 @@ class AppController {
 
             const imageEl = this.cameraModal.querySelector('img')
             const dataURL = this.capturePhoto()
+
+            this.captureAudio.play()
 
             this.cameraController.stop()
 
