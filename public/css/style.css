@@ -120,6 +120,7 @@ background-color: rgba(0,0,0,0.3) !important;
 .user_img{
     height: 70px;
     width: 70px;
+    cursor: pointer;
     border:1.5px solid #f5f6fa;
 
 }
@@ -366,3 +367,30 @@ margin-bottom: 15px !important;
     }
   }
   
+
+  .modal input[type=text], input[type=password] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+  }
+
+  #edit-profile-modal button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  #edit-profile-modal img.avatar {
+    display: block;
+    width: 150px;
+    height: 150px;
+    margin: 10px auto;
+    border-radius: 50%;
+  }

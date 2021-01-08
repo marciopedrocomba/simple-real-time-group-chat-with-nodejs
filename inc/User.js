@@ -76,6 +76,47 @@ module.exports = {
 
     }, 
 
+    update(params) {
+
+        return new Promise(async (resolve, reject) => {
+
+            try {
+
+                let query, values = [
+                    params.username,
+                    params.email
+                ];
+
+                if(params.photo) {
+
+                    params.photo = path.parse(params.photo).base
+                    query = `update users set username = ?, email = ?, photo = ? where id = ?`
+                    values.push(params.photo)
+
+                }else {
+
+                    query = `update users set username = ?, email = ? where id = ?`
+
+                }
+
+                values.push(params.id)
+
+                conn.query(query, values, (err, results) => {
+
+                    if(err) reject(err)
+                    else resolve(results)
+                })
+                
+            } catch (error) {
+                
+                reject(error)
+
+            }
+
+        })
+
+    },
+
     login(email, password) {
 
         return new Promise(async (resolve, reject) => {

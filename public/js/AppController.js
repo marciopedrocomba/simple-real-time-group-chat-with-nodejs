@@ -15,6 +15,9 @@ class AppController {
         this.viewPhotoModal = document.getElementById('view-image-modal')
         this.allImages = [...document.querySelectorAll('.sent-photo')]
 
+        this.userProfileBtnEl = document.querySelector('.user_img')
+        this.profileModalEl = document.getElementById('edit-profile-modal')
+
         this.initialize()
 
     }
@@ -100,6 +103,18 @@ class AppController {
         this.allImages.forEach(image => {
 
             this.addImageClickEvent(image)
+
+        })
+
+        this.userProfileBtnEl.addEventListener('click', e => {
+
+            this.profileModalEl.style.display = 'block'
+
+        })
+
+        this.profileModalEl.querySelector('.close').addEventListener('click', e => {
+
+            this.profileModalEl.style.display = 'none'
 
         })
 

@@ -158,9 +158,40 @@ function calcTime(duration) {
 			<img class="modal-content" id="camera-photo" src="/img/<%= user.photo %>">
 		</div>
 
+		<div id="edit-profile-modal" class="modal">
+
+			<span class="close">&times;</span>
+
+			<form class="modal-content animate" action="/update-user" method="post" enctype="multipart/form-data">
+				<div class="imgcontainer">
+				  <img src="/img/<%= user.photo %>" alt="Avatar" class="avatar">
+				  <input style="display: none;" type="file" name="photo" id="photo">
+				</div>
+			
+				<div class="container">
+
+				  <input type="hidden" name="id" value="<%= user.id %>">
+
+				  <label><b>Username</b></label>
+				  <input type="text" placeholder="Enter Username" name="username" value="<%= user.username %>" required>
+
+				  <label><b>E-mail</b></label>
+				  <input type="text" placeholder="Enter E-mail" name="email" value="<%= user.email %>" required>
+					
+				  <button type="submit">Update</button>
+				</div>
+				
+			  </form>
+		</div>
+
 	</body>
 </html>
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="/js/CameraController.js"></script>
+<script src="/js/plugins/ImageLoadPlugin.js"></script>
 <script src="/js/AppController.js"></script>
+
+<script>
+    new ImageLoadPlugin(".avatar", "#photo")
+</script>

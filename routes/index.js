@@ -275,6 +275,58 @@ router.post('/file-upload', authMiddleware, formidable, async (req, res) => {
 
 })
 
+router.post('/update-user', authMiddleware, formidable, async (req, res) => {
+
+  try {
+
+    const allwedtypes = ['image/jpg', 'image/jpeg', 'image/png', 'image/gif']
+
+    if(!req.body.username) {
+
+      res.send("Please fill the username field")
+
+    }else if(!req.body.email) {
+
+      res.send("Please fill the email field")
+
+    }else {
+
+      let params = {
+        id: req.body.id,
+        username: req.body.username,
+        email: req.body.email
+      }
+
+      if(req.files.photo.size != 0) {
+
+        if(!allwedtypes.includes(req.files.photo.type)) return register.render(req, res, "The files type is not accepted, Allowed: {'image/jpg', 'image/jpeg', 'image/png', 'image/gif'}")
+
+        params.photo = req.files.photo.path
+
+      }
+
+      const userExists = await User.validateUserExists(req.body.username, req.body.email)
+
+      if(!userExists.email) {
+        return res.send("Opps! username or email already exists, try another one")
+      } 
+
+      const updatedUser = await User.update(params)
+
+      if(updatedUser) {
+        res.redirect('/logout')
+      }
+
+    }
+    
+  } catch (error) {
+    
+    console.log(error)
+
+  }  
+
+})
+
 return router
 
 } 
