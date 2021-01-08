@@ -1,6 +1,7 @@
 var express = require('express')
 var router = express.Router()
 const moment = require('moment')
+const path = require('path')
 
 //routes includes
 const register = require('../inc/register')
@@ -55,6 +56,11 @@ router.get('/app', authMiddleware, async function(req, res, next) {
 
   }
 
+})
+
+router.get('/logout', (req, res) => {
+  delete req.session.user
+  res.redirect('/')
 })
 
 //POST METHODS
@@ -214,9 +220,59 @@ router.post('/message', authMiddleware, async (req, res, next) => {
 
 })
 
-router.get('/logout', (req, res) => {
-  delete req.session.user
-  res.redirect('/')
+router.post('/file-upload', authMiddleware, formidable, async (req, res) => {
+
+  try {
+
+    const who = req.body.user
+    const file = req.files.upload_photo
+    const photo = path.parse(file.path).base
+    const time = Date.now()
+
+    if(!who) {
+
+      res.json({
+        error: "error"
+      })
+
+    }else {
+
+      const messageSaved = Message.save({
+        who,
+        photo,
+        date: moment().format('YYYY-MM-DD'),
+        time,
+        type: file.type
+      })
+
+      if(messageSaved) {
+
+        const data = {
+          user: who,
+          message: photo,
+          photo: req.body.photo,
+          time,
+          type: file.type
+        }
+
+        io.emit('new message photo', data) 
+
+        res.json({
+          success: true,
+          body: req.body,
+          files: req.files
+        })
+
+      }
+
+    }
+    
+  } catch (error) {
+    
+    console.log(error)
+
+  }
+
 })
 
 return router

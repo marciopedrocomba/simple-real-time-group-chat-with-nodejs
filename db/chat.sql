@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 03, 2021 at 12:02 AM
+-- Generation Time: Jan 08, 2021 at 04:03 PM
 -- Server version: 10.4.16-MariaDB
 -- PHP Version: 7.4.12
 
@@ -32,7 +32,8 @@ CREATE TABLE `messages` (
   `who` int(11) NOT NULL,
   `content` text NOT NULL,
   `date` date NOT NULL,
-  `time` bigint(20) NOT NULL
+  `time` bigint(20) NOT NULL,
+  `type` varchar(50) DEFAULT 'text/plain'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -47,6 +48,7 @@ CREATE TABLE `messages_view` (
 ,`content` text
 ,`date` date
 ,`time` bigint(20)
+,`type` varchar(50)
 );
 
 -- --------------------------------------------------------
@@ -70,7 +72,7 @@ CREATE TABLE `users` (
 --
 DROP TABLE IF EXISTS `messages_view`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `messages_view`  AS SELECT `users`.`id` AS `user`, `users`.`photo` AS `photo`, `messages`.`content` AS `content`, `messages`.`date` AS `date`, `messages`.`time` AS `time` FROM (`messages` join `users` on(`messages`.`who` = `users`.`id`)) ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `messages_view`  AS SELECT `users`.`id` AS `user`, `users`.`photo` AS `photo`, `messages`.`content` AS `content`, `messages`.`date` AS `date`, `messages`.`time` AS `time`, `messages`.`type` AS `type` FROM (`messages` join `users` on(`messages`.`who` = `users`.`id`)) ;
 
 --
 -- Indexes for dumped tables
@@ -98,13 +100,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `messages`
 --
 ALTER TABLE `messages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Constraints for dumped tables

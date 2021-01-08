@@ -69,7 +69,17 @@ function calcTime(duration) {
 											<img src="/img/<%= message.photo %>" class="rounded-circle user_img_msg">
 										</div>
 										<div class="msg_cotainer">
-											<%= message.content %> 
+
+											<% if(message.type == 'image/png') { %> 
+
+												<img class="sent-photo" src="/img/<%= message.content %>">
+
+											<% }else { %> 
+
+												<%= message.content %> 
+
+											<% } %> 
+
 											<% if(calcTime(Date.now() - message.time).indexOf('d') > -1) { %>
 
 												<span class="msg_time_send"><%= message.date.toLocaleDateString('pt') %></span>
@@ -86,7 +96,17 @@ function calcTime(duration) {
 
 									<div class="d-flex justify-content-end mb-4">
 										<div class="msg_cotainer_send">
-											<%= message.content %> 
+
+											<% if(message.type == 'image/png') { %> 
+
+												<img class="sent-photo" src="/img/<%= message.content %>">
+
+											<% }else { %> 
+
+												<%= message.content %> 
+
+											<% } %> 
+
 											<% if(calcTime(Date.now() - message.time).indexOf('d') > -1) { %>
 
 												<span class="msg_time_send"><%= message.date.toLocaleDateString('pt') %></span>
@@ -131,6 +151,11 @@ function calcTime(duration) {
 				<button class="btn-capture-photo"><i class="fas fa-image"></i></button>
 				<button class="btn-send-photo" style="display: none;"><i class="fas fa-location-arrow"></i></button>
 			</div>
+		</div>
+
+		<div id="view-image-modal" class="modal">
+			<span class="close">&times;</span>
+			<img class="modal-content" id="camera-photo" src="/img/<%= user.photo %>">
 		</div>
 
 	</body>

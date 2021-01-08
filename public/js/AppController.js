@@ -5,13 +5,15 @@ class AppController {
         this.openCameraBtnEl = document.querySelector('.input-group-append .open_photo')
         this.messageCardEl = document.querySelector('.msg_card_body')
 
-        this.user = document.querySelector('[name=message-user]').value
+        this.user = document.querySelector('[name=message-user]').value.trim()
         this.photo = document.querySelector('[name=message-photo]').value
         this.messageEl = document.querySelector('[name=message-content]')
 
         this.audio = new Audio('/sounds/accomplished-579.ogg')
 
         this.cameraModal = document.getElementById('camera-modal')
+        this.viewPhotoModal = document.getElementById('view-image-modal')
+        this.allImages = [...document.querySelectorAll('.sent-photo')]
 
         this.initialize()
 
@@ -28,7 +30,7 @@ class AppController {
                 return
             }
 
-            this.sendMessage(this.user.trim(), message, this.photo)
+            this.sendMessage('/message')
 
         })
         
@@ -40,10 +42,8 @@ class AppController {
         })
 
         this.cameraModal.querySelector('.close').addEventListener('click', e => {
-            this.cameraModal.style.display = 'none'
-            this.cameraModal.querySelector('video').style.display = 'block'
-            this.cameraModal.querySelector('img').style.display = 'none'
-            this.cameraController.stop()
+            // the capture photo modal
+            this.closeCaptureModal()
         })
 
         this.cameraModal.querySelector('.btn-capture-photo').addEventListener('click', e => {
@@ -53,6 +53,8 @@ class AppController {
 
             const imageEl = this.cameraModal.querySelector('img')
             const dataURL = this.capturePhoto()
+
+            this.cameraController.stop()
 
             imageEl.src = dataURL
             
@@ -65,7 +67,7 @@ class AppController {
 
             const blob = this.dataURItoBlob(imageURL)
 
-            const file = new File([blob], `photo-${Date.now()}`, {
+            const file = new File([blob], `photo-${Date.now()}.png`, {
                 type: 'image/png',
                 lastModified: Date.now()
             })
@@ -86,12 +88,24 @@ class AppController {
                             return
                         }
 
-                        this.sendMessage(this.user.trim(), message, this.photo)
+                        this.sendMessage('/message')
                     }
                         
                     break
 
             }
+
+        })
+
+        this.allImages.forEach(image => {
+
+            this.addImageClickEvent(image)
+
+        })
+
+        this.viewPhotoModal.querySelector('.close').addEventListener('click', e => {
+
+            this.viewPhotoModal.style.display = 'none'
 
         })
 
@@ -158,6 +172,89 @@ class AppController {
 
         })
 
+        this.socket.on('new message photo', data => {
+
+            const imageEl = this.createElement('img', {}, element => {
+                element.classList.add('sent-photo')
+            })
+
+            imageEl.src = `/img/${data.message}`
+
+            this.addImageClickEvent(imageEl)
+
+            if(data.user == this.user) {
+
+                const msgContainer = this.createElement('div', {
+                    innerHTML: `
+                        <span class="msg_time_send">now</span>
+                    `
+                }, element => {
+
+                    element.classList.add('msg_cotainer_send')
+
+                })
+
+                const div = this.createElement('div', {
+
+                    innerHTML: `
+                        <div class="img_cont_msg">
+                            <img src="/img/${data.photo}" class="rounded-circle user_img_msg">
+                        </div>
+                    `
+
+                }, element => {
+
+                    element.classList.add('d-flex', 'justify-content-end', 'mb-4')
+                })
+
+
+                msgContainer.prepend(imageEl)
+
+                div.prepend(msgContainer)
+
+                this.messageCardEl.appendChild(div)
+
+            }else {
+
+                const msgContainer = this.createElement('div', {
+                    innerHTML: `
+                        <span class="msg_time_send">now</span>
+                    `
+                }, element => {
+
+                    element.classList.add('msg_cotainer')
+
+                })
+
+                const div = this.createElement('div', {
+
+                    innerHTML: `
+                        <div class="img_cont_msg">
+                            <img src="/img/${data.photo}" class="rounded-circle user_img_msg">
+                        </div>
+                    `
+
+                }, element => {
+
+                    element.classList.add('d-flex', 'justify-content-start', 'mb-4')
+                })
+
+                msgContainer.prepend(imageEl)
+
+                div.append(msgContainer)
+
+                this.messageCardEl.appendChild(div)
+
+                this.playAudio()
+
+            }
+
+            //update the messages statistics
+            this.updateMessageCount()
+            
+
+        })
+
         this.socket.on('new user', data => {
 
             const div = this.createElement('div', {
@@ -187,9 +284,45 @@ class AppController {
 
     }
 
+    addImageClickEvent(image) {
+
+        image.addEventListener('click', e => {
+
+            this.viewPhotoModal.style.display = 'block'
+            this.viewPhotoModal.querySelector('img').src = image.src
+
+        })
+
+    }
+
+    closeCaptureModal() {
+
+        this.cameraModal.style.display = 'none'
+        this.cameraModal.querySelector('video').style.display = 'block'
+        this.cameraModal.querySelector('img').style.display = 'none'
+        this.cameraController.stop()
+
+    }
+
     sendFile(file) {
 
-        console.log(file)
+        const formadata = new FormData()
+
+        formadata.append('upload_photo', file)
+        formadata.append('user', this.user)
+        formadata.append('photo', this.photo)
+
+        const options = {
+            method: "POST",
+            body: formadata
+        }
+
+        this.sendMessage('/file-upload', options, {
+            onSuccess: (json) => {
+                // do close the capture modal
+                this.closeCaptureModal()
+            }
+        })
 
     }
 
@@ -251,7 +384,7 @@ class AppController {
         this.audio.play()
     }
 
-    createElement(element, options, callback) {
+    createElement(element, options = {}, callback = function() {}) {
 
         const el = document.createElement(element)
 
@@ -267,21 +400,23 @@ class AppController {
 
     }
 
-    sendMessage(user, message, photo) {
-
-        const body = {
-            user,
-            message,
-            photo
-        }
-
-        const request = new Request('/message', {
-            method: "POST",
-            body: JSON.stringify(body),
-            headers: new Headers({
-                'Content-Type': 'application/json'
-            })
+    sendMessage(url, options = {
+        method: "POST",
+        body: JSON.stringify({
+            user: this.user,
+            message: this.messageEl.value,
+            photo: this.photo
+        }),
+        headers: new Headers({
+            'Content-Type': 'application/json'
         })
+    }, config = {
+        onSuccess: function() {
+            document.querySelector('[name=message-content]').value = ''
+        }
+    }) {
+
+        const request = new Request(url, options)
 
         fetch(request).then(response => {
 
@@ -293,8 +428,9 @@ class AppController {
 
                 }else if(json.success) {
 
-
-                    document.querySelector('[name=message-content]').value = ''
+                    if(typeof config.onSuccess == 'function') {
+                        config.onSuccess(json)
+                    }
 
                 }
 
