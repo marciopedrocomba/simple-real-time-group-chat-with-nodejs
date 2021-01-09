@@ -255,7 +255,7 @@ router.post('/file-upload', authMiddleware, formidable, async (req, res) => {
           type: file.type
         }
 
-        io.emit('new message photo', data) 
+        io.emit('new message file', data) 
 
         res.json({
           success: true,

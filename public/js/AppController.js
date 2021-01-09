@@ -19,6 +19,10 @@ class AppController {
         this.userProfileBtnEl = document.querySelector('.user_img')
         this.profileModalEl = document.getElementById('edit-profile-modal')
 
+        this.microphoneTimerEl = document.querySelector('.microphone_timer')
+        this.openMicroPhoneEl = document.querySelector('.open_microphone')
+        this.closeMicroPhoneEl = document.querySelector('.close_microphone')
+
         this.initialize()
 
     }
@@ -27,14 +31,28 @@ class AppController {
 
         this.sendMessageBtnEl.addEventListener('click', e => {
 
-            const message = this.messageEl.value
+            let classArray = [...this.sendMessageBtnEl.classList]
+            
+            if(!(classArray.indexOf('send_audio') > - 1)) {
 
-            if(!message) {
-                alert("Please enter a message!")
-                return
+                const message = this.messageEl.value
+
+                if(!message) {
+                    alert("Please enter a message!")
+                    return
+                }
+
+                this.sendMessage('/message')
+
+            }else { 
+
+                this.stopRecording()
+                this.microphoneController.listeners.stoppedRecording = (file) => {
+                    this.sendFile(file)
+                }
+
             }
 
-            this.sendMessage('/message')
 
         })
         
@@ -127,6 +145,27 @@ class AppController {
 
         })
 
+        this.openMicroPhoneEl.addEventListener('click', e => {
+
+            this.sendMessageBtnEl.classList.add('send_audio')
+
+            this.microphoneController = new MicrophoneController()
+
+            this.toggleMicrophoneControllers()
+
+            const recordTimeStart = Date.now()
+
+            this.startRecordTimerFormatting(recordTimeStart)
+
+
+        })
+
+        this.closeMicroPhoneEl.addEventListener('click', e => {
+
+            this.stopRecording()
+
+        })
+
         this.socket = io()
 
         this.socket.on('new message', data => {
@@ -144,7 +183,7 @@ class AppController {
 
                         </div>
                         <div class="img_cont_msg">
-                            <img src="/img/${data.photo}" class="rounded-circle user_img_msg">
+                            <img src="/uploads/${data.photo}" class="rounded-circle user_img_msg">
                         </div>
 
                     `
@@ -163,7 +202,7 @@ class AppController {
                     innerHTML: `
 
                         <div class="img_cont_msg">
-                            <img src="/img/${data.photo}" class="rounded-circle user_img_msg">
+                            <img src="/uploads/${data.photo}" class="rounded-circle user_img_msg">
                         </div>
 
                         <div class="msg_cotainer">
@@ -190,80 +229,142 @@ class AppController {
 
         })
 
-        this.socket.on('new message photo', data => {
+        this.socket.on('new message file', data => {
 
-            const imageEl = this.createElement('img', {}, element => {
-                element.classList.add('sent-photo')
-            })
+            if(data.type == 'image/png') {
 
-            imageEl.src = `/img/${data.message}`
-
-            this.addImageClickEvent(imageEl)
-
-            if(data.user == this.user) {
-
-                const msgContainer = this.createElement('div', {
-                    innerHTML: `
-                        <span class="msg_time_send">now</span>
-                    `
-                }, element => {
-
-                    element.classList.add('msg_cotainer_send')
-
+                const imageEl = this.createElement('img', {}, element => {
+                    element.classList.add('sent-photo')
                 })
+    
+                imageEl.src = `/uploads/${data.message}`
+    
+                this.addImageClickEvent(imageEl)
+    
+                if(data.user == this.user) {
+    
+                    const msgContainer = this.createElement('div', {
+                        innerHTML: `
+                            <span class="msg_time_send">now</span>
+                        `
+                    }, element => {
+    
+                        element.classList.add('msg_cotainer_send')
+    
+                    })
+    
+                    const div = this.createElement('div', {
+    
+                        innerHTML: `
+                            <div class="img_cont_msg">
+                                <img src="/uploads/${data.photo}" class="rounded-circle user_img_msg">
+                            </div>
+                        `
+    
+                    }, element => {
+    
+                        element.classList.add('d-flex', 'justify-content-end', 'mb-4')
+                    })
+    
+    
+                    msgContainer.prepend(imageEl)
+    
+                    div.prepend(msgContainer)
+    
+                    this.messageCardEl.appendChild(div)
+    
+                }else {
+    
+                    const msgContainer = this.createElement('div', {
+                        innerHTML: `
+                            <span class="msg_time_send">now</span>
+                        `
+                    }, element => {
+    
+                        element.classList.add('msg_cotainer')
+    
+                    })
+    
+                    const div = this.createElement('div', {
+    
+                        innerHTML: `
+                            <div class="img_cont_msg">
+                                <img src="/uploads/${data.photo}" class="rounded-circle user_img_msg">
+                            </div>
+                        `
+    
+                    }, element => {
+    
+                        element.classList.add('d-flex', 'justify-content-start', 'mb-4')
+                    })
+    
+                    msgContainer.prepend(imageEl)
+    
+                    div.append(msgContainer)
+    
+                    this.messageCardEl.appendChild(div)
+    
+                    this.playAudio()
+    
+                }
 
-                const div = this.createElement('div', {
+            }else if(data.type == 'audio/webm') {
 
-                    innerHTML: `
-                        <div class="img_cont_msg">
-                            <img src="/img/${data.photo}" class="rounded-circle user_img_msg">
-                        </div>
-                    `
+                if(data.user == this.user) {
 
-                }, element => {
-
-                    element.classList.add('d-flex', 'justify-content-end', 'mb-4')
-                })
-
-
-                msgContainer.prepend(imageEl)
-
-                div.prepend(msgContainer)
-
-                this.messageCardEl.appendChild(div)
-
-            }else {
-
-                const msgContainer = this.createElement('div', {
-                    innerHTML: `
-                        <span class="msg_time_send">now</span>
-                    `
-                }, element => {
-
-                    element.classList.add('msg_cotainer')
-
-                })
-
-                const div = this.createElement('div', {
-
-                    innerHTML: `
-                        <div class="img_cont_msg">
-                            <img src="/img/${data.photo}" class="rounded-circle user_img_msg">
-                        </div>
-                    `
-
-                }, element => {
-
-                    element.classList.add('d-flex', 'justify-content-start', 'mb-4')
-                })
-
-                msgContainer.prepend(imageEl)
-
-                div.append(msgContainer)
-
-                this.messageCardEl.appendChild(div)
-
-                this.playAudio()
+                    const div = this.createElement('div', {
+    
+                        innerHTML: `
+    
+                            <div class="msg_cotainer_send">
+                                <audio controls>
+                                    <source src="/uploads/${data.message}" type="${data.type}">
+                                </audio>
+                                <span class="msg_time_send">now</span>
+    
+                            </div>
+                            <div class="img_cont_msg">
+                                <img src="/uploads/${data.photo}" class="rounded-circle user_img_msg">
+                            </div>
+    
+                        `
+    
+                    }, element => {
+    
+                        element.classList.add('d-flex', 'justify-content-end', 'mb-4')
+                    })
+    
+                    this.messageCardEl.appendChild(div)
+    
+                }else {
+    
+                    const div = this.createElement('div', {
+    
+                        innerHTML: `
+    
+                            <div class="img_cont_msg">
+                                <img src="/uploads/${data.photo}" class="rounded-circle user_img_msg">
+                            </div>
+    
+                            <div class="msg_cotainer">
+                                <audio controls>
+                                    <source src="/uploads/${data.message}" type="${data.type}">
+                                </audio>
+                                <span class="msg_time_send">now</span>
+                            </div>
+    
+                        `
+    
+                    }, element => {
+    
+                        element.classList.add('d-flex', 'justify-content-start', 'mb-4')
+                    })
+    
+                    this.messageCardEl.appendChild(div)
+    
+                    this.playAudio()
+    
+                }
 
             }
 
@@ -280,7 +381,7 @@ class AppController {
                 innerHTML: `
 
                     <div class="img_cont_msg">
-                        <img src="/img/${data.photo}" class="rounded-circle user_img_msg">
+                        <img src="/uploads/${data.photo}" class="rounded-circle user_img_msg">
                     </div>
 
                     <div class="msg_cotainer">
@@ -299,6 +400,46 @@ class AppController {
             this.playAudio()
 
         })
+
+    }
+
+    stopRecording() {
+
+        this.toggleMicrophoneControllers(false)
+        this.microphoneController.stopRecord()
+        this.stopRecordTimerFormatting()
+        this.sendMessageBtnEl.classList.remove('send_audio')
+
+    }
+
+    startRecordTimerFormatting(timestart) {
+
+        this.recordMicroPhoneTimer = setInterval(() => {
+
+            this.microphoneTimerEl.querySelector('div').innerHTML = Format.formatTime(Date.now() - timestart)
+
+        }, 1000)
+
+    }
+
+    stopRecordTimerFormatting() {
+
+        clearInterval(this.recordMicroPhoneTimer)
+        this.microphoneTimerEl.querySelector('div').innerHTML = '00:00'
+
+    }
+
+    toggleMicrophoneControllers(state = true) {
+
+        if(state) {
+            this.openMicroPhoneEl.style.display = 'none'
+            this.closeMicroPhoneEl.style.display = 'flex'
+            this.microphoneTimerEl.style.display = 'flex'
+        }else {
+            this.openMicroPhoneEl.style.display = 'flex'
+            this.closeMicroPhoneEl.style.display = 'none'
+            this.microphoneTimerEl.style.cssText = "display: none !important;border-radius: 0px !important;"
+        }
 
     }
 

@@ -48,7 +48,7 @@ function calcTime(duration) {
 						<div class="d-flex justify-content-between card-header msg_head">
 							<div class="d-flex bd-highlight">
 								<div class="img_cont">
-									<img src="/img/<%= user.photo %> " class="rounded-circle user_img">
+									<img src="/uploads/<%= user.photo %> " class="rounded-circle user_img">
 									<span class="online_icon"></span>
 								</div>
 								<div class="user_info">
@@ -66,13 +66,13 @@ function calcTime(duration) {
 
 									<div class="d-flex justify-content-start mb-4">
 										<div class="img_cont_msg">
-											<img src="/img/<%= message.photo %>" class="rounded-circle user_img_msg">
+											<img src="/uploads/<%= message.photo %>" class="rounded-circle user_img_msg">
 										</div>
 										<div class="msg_cotainer">
 
 											<% if(message.type == 'image/png') { %> 
 
-												<img class="sent-photo" src="/img/<%= message.content %>">
+												<img class="sent-photo" src="/uploads/<%= message.content %>">
 
 											<% }else { %> 
 
@@ -99,13 +99,20 @@ function calcTime(duration) {
 
 											<% if(message.type == 'image/png') { %> 
 
-												<img class="sent-photo" src="/img/<%= message.content %>">
+												<img class="sent-photo" src="/uploads/<%= message.content %>">
 
-											<% }else { %> 
+											<% }else if(message.type == 'audio/webm') { %> 
+
+												<audio controls>
+													<source src="/uploads/<%= message.content %> " type="audio/webm">
+												</audio>
+
+											<% } else { %> 
 
 												<%= message.content %> 
+											
+											<% } %>
 
-											<% } %> 
 
 											<% if(calcTime(Date.now() - message.time).indexOf('d') > -1) { %>
 
@@ -118,7 +125,7 @@ function calcTime(duration) {
 											<% } %> 
 										</div>
 										<div class="img_cont_msg">
-											<img src="/img/<%= message.photo %>" class="rounded-circle user_img_msg">
+											<img src="/uploads/<%= message.photo %>" class="rounded-circle user_img_msg">
 										</div>
 									</div>
 
@@ -132,6 +139,9 @@ function calcTime(duration) {
 								<input type="hidden" name="message-photo" value="<%= user.photo %>">
 								<textarea name="message-content" class="form-control type_msg" placeholder="Type your message..."></textarea>
 								<div class="input-group-append">
+									<span class="input-group-text microphone_timer d-flex justify-content-between align-items-center" style="display: none !important; border-radius: 0px !important;"><span></span><div>00:00</div></span>
+									<span class="input-group-text close_microphone" style="display: none; border-radius: 0px !important;"><i class="fas fa-times" style="color: red;"></i></span>
+									<span class="input-group-text open_microphone" style="border-radius: 0px !important;"><i class="fas fa-microphone"></i></span>
 									<span class="input-group-text open_photo" style="border-radius: 0px !important;"><i class="fas fa-image"></i></span>
 									<span class="input-group-text send_btn"><i class="fas fa-location-arrow"></i></span>
 								</div>
@@ -146,7 +156,7 @@ function calcTime(duration) {
 		<div id="camera-modal" class="modal">
 			<span class="close">&times;</span>
 			<video class="modal-content" id="camera-video"></video>
-			<img style="display: none;" class="modal-content" id="camera-photo" src="/img/<%= user.photo %>">
+			<img style="display: none;" class="modal-content" id="camera-photo" src="/uploads/<%= user.photo %>">
 			<div id="caption">
 				<button class="btn-capture-photo"><i class="fas fa-image"></i></button>
 				<button class="btn-send-photo" style="display: none;"><i class="fas fa-location-arrow"></i></button>
@@ -155,7 +165,7 @@ function calcTime(duration) {
 
 		<div id="view-image-modal" class="modal">
 			<span class="close">&times;</span>
-			<img class="modal-content" id="camera-photo" src="/img/<%= user.photo %>">
+			<img class="modal-content" id="camera-photo" src="/uploads/<%= user.photo %>">
 		</div>
 
 		<div id="edit-profile-modal" class="modal">
@@ -164,7 +174,7 @@ function calcTime(duration) {
 
 			<form class="modal-content animate" action="/update-user" method="post" enctype="multipart/form-data">
 				<div class="imgcontainer">
-				  <img src="/img/<%= user.photo %>" alt="Avatar" class="avatar">
+				  <img src="/uploads/<%= user.photo %>" alt="Avatar" class="avatar">
 				  <input style="display: none;" type="file" name="photo" id="photo">
 				</div>
 			
@@ -188,7 +198,9 @@ function calcTime(duration) {
 </html>
 
 <script src="/socket.io/socket.io.js"></script>
+<script src="/js/utils/Format.js"></script>
 <script src="/js/CameraController.js"></script>
+<script src="/js/MicrophoneController.js"></script>
 <script src="/js/plugins/ImageLoadPlugin.js"></script>
 <script src="/js/AppController.js"></script>
 

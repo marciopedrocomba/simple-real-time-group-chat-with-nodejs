@@ -83,12 +83,36 @@ background-color: rgba(0,0,0,0.3) !important;
     cursor: pointer;
 }
 .send_btn,
-.open_photo{
+.open_photo,
+.open_microphone,
+.microphone_timer,
+.close_microphone{
 border-radius: 0 15px 15px 0 !important;
 background-color: rgba(0,0,0,0.3) !important;
     border:0 !important;
     color: white !important;
     cursor: pointer;
+}
+
+audio:focus {
+  outline: none;
+}
+
+.microphone_timer span {
+  display: block;
+  width: 10px;
+  height: 10px;
+  margin: 0 6px;
+  border-radius: 50%;
+  animation-name: fadeRecIcon;
+  animation-duration: 1.2s;
+  animation-iteration-count: infinite;
+  background: red;
+}
+
+.microphone_timer p {
+  display: block;
+  background: green;
 }
 
 .sent-photo {
@@ -322,6 +346,12 @@ margin-bottom: 15px !important;
   @keyframes zoom {
     from {transform:scale(0)} 
     to {transform:scale(1)}
+  }
+
+  /**/
+  @keyframes fadeRecIcon {
+    from { opacity: 0.5; }
+    to { opacity: 1; }
   }
   
   /* The Close Button */

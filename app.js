@@ -1,9 +1,11 @@
+require('dotenv').config()
 var createError = require('http-errors')
 var express = require('express')
 var path = require('path')
 var cookieParser = require('cookie-parser')
 var logger = require('morgan')
 
+const PORT = process.env.PORT || 4000
 
 const redis = require('redis')
 const session = require('express-session')
@@ -65,8 +67,8 @@ app.use(function(err, req, res, next) {
   res.render('error')
 })
 
-http.listen('4000', () => {
-  console.log("SERVER IS RUNNING")
+http.listen(PORT, () => {
+  console.log(`SERVER IS RUNNING ON PORT ${PORT}`)
 })
 
 //module.exports = app
