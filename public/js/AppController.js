@@ -23,11 +23,15 @@ class AppController {
         this.openMicroPhoneEl = document.querySelector('.open_microphone')
         this.closeMicroPhoneEl = document.querySelector('.close_microphone')
 
+        this.autoCount = 0 //variable used to track the auto scroll on message parent
+
         this.initialize()
 
     }
 
     initialize() {
+
+        this.messageCardEl.scrollTop = this.messageCardEl.scrollHeight
 
         this.sendMessageBtnEl.addEventListener('click', e => {
 
@@ -170,6 +174,7 @@ class AppController {
 
         this.socket.on('new message', data => {
 
+            this.autoDetectScrollOnNewMessage()
 
             if(data.user == this.user) {
 
@@ -226,10 +231,13 @@ class AppController {
             //update the messages statistics
             this.updateMessageCount()
             
+            this.autoDetectScrollOnNewMessage()
 
         })
 
         this.socket.on('new message file', data => {
+
+            this.autoDetectScrollOnNewMessage()
 
             if(data.type == 'image/png') {
 
@@ -370,11 +378,13 @@ class AppController {
 
             //update the messages statistics
             this.updateMessageCount()
-            
+            this.autoDetectScrollOnNewMessage()
 
         })
 
         this.socket.on('new user', data => {
+
+            this.autoDetectScrollOnNewMessage()
 
             const div = this.createElement('div', {
 
@@ -398,10 +408,40 @@ class AppController {
             this.messageCardEl.appendChild(div)
 
             this.playAudio()
+            this.autoDetectScrollOnNewMessage()
 
         })
 
     }
+
+
+    autoDetectScrollOnNewMessage() {
+
+        let scrollTop = this.messageCardEl.scrollTop
+        let scrollHeight = this.messageCardEl.scrollHeight
+        let scrollOffsetHeight = this.messageCardEl.offsetHeight
+
+        let auto = (scrollTop >= (scrollHeight - scrollOffsetHeight))
+
+        if(auto) {
+            
+            this.autoCount = 1
+            this.messageCardEl.scrollTop = ((scrollHeight - scrollOffsetHeight))
+
+        }else {
+
+            if(this.autoCount > 0) {
+                this.messageCardEl.scrollTop = ((scrollHeight - scrollOffsetHeight))
+                this.autoCount = 0
+            }else {
+                this.messageCardEl.scrollTop = this.messageCardEl.scrollTop
+            }
+
+        }
+
+
+    }
+
 
     stopRecording() {
 
