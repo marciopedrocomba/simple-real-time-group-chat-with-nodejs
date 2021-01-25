@@ -74,11 +74,17 @@ function calcTime(duration) {
 
 												<img class="sent-photo" src="/uploads/<%= message.content %>">
 
-											<% }else { %> 
+											<% }else if(message.type == 'audio/webm') { %> 
+
+												<audio controls>
+													<source src="/uploads/<%= message.content %> " type="audio/webm">
+												</audio>
+
+											<% } else { %> 
 
 												<%= message.content %> 
-
-											<% } %> 
+											
+											<% } %>
 
 											<% if(calcTime(Date.now() - message.time).indexOf('d') > -1) { %>
 
